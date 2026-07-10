@@ -4,6 +4,17 @@
     "type": "library",
     "license": "MIT",
     "keywords": ["ixc", "ixcsoft", "isp", "sdk", "api-client"],
+    "homepage": "https://github.com/tecrodrigocastro/ixc_sdk",
+    "authors": [
+        {
+            "name": "Rodrigo Castro",
+            "email": "tec.rodrigocastro@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "https://github.com/tecrodrigocastro/ixc_sdk/issues",
+        "source": "https://github.com/tecrodrigocastro/ixc_sdk"
+    },
     "require": {
         "php": "^8.2",
         "guzzlehttp/guzzle": "^7.8",
