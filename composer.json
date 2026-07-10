@@ -1,0 +1,41 @@
+{
+    "name": "redrodrigo/ixc-sdk",
+    "description": "SDK PHP não-oficial para a API REST do IXC Soft, com adapter opcional para Laravel.",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["ixc", "ixcsoft", "isp", "sdk", "api-client"],
+    "require": {
+        "php": "^8.2",
+        "guzzlehttp/guzzle": "^7.8",
+        "psr/simple-cache": "^2.0|^3.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^10.5",
+        "illuminate/support": "^10.0|^11.0|^12.0"
+    },
+    "suggest": {
+        "illuminate/support": "Necessário para usar o adapter Laravel (RedRodrigo\\IxcSdk\\Laravel\\IxcServiceProvider)."
+    },
+    "autoload": {
+        "psr-4": {
+            "RedRodrigo\\IxcSdk\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "RedRodrigo\\IxcSdk\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "RedRodrigo\\IxcSdk\\Laravel\\IxcServiceProvider"
+            ]
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
