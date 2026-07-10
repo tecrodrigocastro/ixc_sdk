@@ -4,8 +4,6 @@ SDK PHP não-oficial para a API REST do [IXC Soft](https://wikiixcsoft.ixcsoft.c
 
 Núcleo sem dependência de framework (`guzzlehttp/guzzle` + `psr/simple-cache` apenas), com um adapter opcional para Laravel.
 
-Extraído do projeto `gerencia-orbe`, onde a integração com o IXC vinha crescendo repetida em vários repositórios/controllers específicos daquela aplicação.
-
 ## Instalação
 
 ```bash
@@ -139,13 +137,12 @@ try {
 }
 ```
 
-## Decisões de design (vindas da extração do gerencia-orbe)
+## Decisões de design
 
-- **Sem swallow de erros**: os repositórios originais às vezes engoliam exceptions em `try/catch` retornando `[]`/`null` silenciosamente. A SDK propaga exceptions tipadas — quem chama decide como tratar.
-- **Cache centralizado**: os `Cache::remember()` que antes viviam espalhados e duplicados em métodos individuais (com TTLs diferentes e chaves manuais) viraram um único decorator plugável (`CachingHttpClient`), com TTL único configurável.
-- **JSON-decode centralizado**: o `json_decode($response->getBody()->getContents(), true)` repetido em todo método de repositório agora vive em um único lugar (`GuzzleHttpClient::get()`).
-- **Retornos preservados**: cada método de resource mantém a mesma assinatura e formato de retorno dos repositórios originais (`array`, às vezes lista, às vezes só o primeiro registro, às vezes a estrutura bruta `{total, registros}`) — isso é intencional para manter compatibilidade com o código já existente no `gerencia-orbe` ao trocar a implementação depois. Para um formato normalizado e tipado, use `RedRodrigo\IxcSdk\Support\ListResponse` (usado internamente, também exposto publicamente).
-- **Não portado**: `IxcClientService::postRequestDraWhats()` (integração com WhatsApp da DRA Telecom, acoplada a um Eloquent Model local) e o repositório legado `App\Repositories\IxcRepositoryInterface`/`Impl` (usado em Commands/Jobs/Livewire do gerencia-orbe) ficaram de fora desta extração — não são específicos do IXC ou têm acoplamento amplo demais para uma primeira versão da SDK.
+- **Sem swallow de erros**: falhas de transporte e respostas inválidas lançam exceptions tipadas (`IxcRequestException`, `IxcResponseException`) em vez de retornar `[]`/`null` silenciosamente. Quem chama decide como tratar.
+- **Cache centralizado**: em vez de cada método decidir se e como cachear (TTLs diferentes, chaves manuais), o cache é um único decorator plugável (`CachingHttpClient`) que pode envolver qualquer implementação de `HttpClientInterface`.
+- **JSON-decode centralizado**: a decodificação da resposta HTTP acontece em um único lugar (`GuzzleHttpClient::get()`), não repetida em cada método de resource.
+- **Retornos pragmáticos por padrão**: cada método de resource retorna o formato mais natural para aquele endpoint (`array`, lista, só o primeiro registro, ou a estrutura bruta `{total, registros}` do IXC) em vez de forçar um único formato genérico. Para um formato normalizado e tipado, use `RedRodrigo\IxcSdk\Support\ListResponse` (usado internamente, também exposto publicamente).
 
 ## Testes
 
@@ -153,7 +150,3 @@ try {
 composer install
 vendor/bin/phpunit
 ```
-
-## Contexto (gerencia-orbe)
-
-Este pacote nasceu de `app/Repositories/Ixc/*` + `app/Services/IxcClientService.php` no projeto `gerencia-orbe`. Para migrar aquele projeto para usar esta SDK: trocar os bindings de `IxcClienteRepositoryInterface` (e demais) no `AppServiceProvider` pelos resources equivalentes aqui (`ClienteResource`, `ComercialResource`, etc.), ou manter as interfaces locais como fachada fina delegando para a SDK.
