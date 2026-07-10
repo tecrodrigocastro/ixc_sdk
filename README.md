@@ -1,10 +1,16 @@
 # ixc-sdk
 
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/redrodrigo/ixc-sdk.svg)](https://packagist.org/packages/redrodrigo/ixc-sdk)
+[![Total Downloads](https://img.shields.io/packagist/dt/redrodrigo/ixc-sdk.svg)](https://packagist.org/packages/redrodrigo/ixc-sdk)
+[![License](https://img.shields.io/packagist/l/redrodrigo/ixc-sdk.svg)](https://github.com/tecrodrigocastro/ixc_sdk/blob/main/LICENSE)
+
 SDK PHP não-oficial para a API REST do [IXC Soft](https://wikiixcsoft.ixcsoft.com.br/) (ERP de provedores de internet).
 
 Núcleo sem dependência de framework (`guzzlehttp/guzzle` + `psr/simple-cache` apenas), com um adapter opcional para Laravel.
 
 ## Instalação
+
+Disponível no [Packagist](https://packagist.org/packages/redrodrigo/ixc-sdk) — instale via Composer:
 
 ```bash
 composer require redrodrigo/ixc-sdk
