@@ -9,7 +9,9 @@ use RedRodrigo\IxcSdk\Resources\ComercialResource;
 use RedRodrigo\IxcSdk\Resources\ContratoResource;
 use RedRodrigo\IxcSdk\Resources\EstoqueResource;
 use RedRodrigo\IxcSdk\Resources\FinanceiroResource;
+use RedRodrigo\IxcSdk\Resources\FuncionarioResource;
 use RedRodrigo\IxcSdk\Resources\OsResource;
+use RedRodrigo\IxcSdk\Resources\TicketResource;
 use RedRodrigo\IxcSdk\Resources\VeiculoResource;
 
 /**
@@ -36,7 +38,11 @@ final class IxcClient
 
     private ?FinanceiroResource $financeiro = null;
 
+    private ?FuncionarioResource $funcionario = null;
+
     private ?OsResource $os = null;
+
+    private ?TicketResource $ticket = null;
 
     private ?VeiculoResource $veiculo = null;
 
@@ -74,9 +80,19 @@ final class IxcClient
         return $this->financeiro ??= new FinanceiroResource($this->http);
     }
 
+    public function funcionario(): FuncionarioResource
+    {
+        return $this->funcionario ??= new FuncionarioResource($this->http);
+    }
+
     public function os(): OsResource
     {
         return $this->os ??= new OsResource($this->http);
+    }
+
+    public function ticket(): TicketResource
+    {
+        return $this->ticket ??= new TicketResource($this->http);
     }
 
     public function veiculo(): VeiculoResource

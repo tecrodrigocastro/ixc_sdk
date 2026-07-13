@@ -128,4 +128,67 @@ final class ClienteResource extends AbstractResource
 
         return $this->list('/cliente_contrato', $query)->first() ?? [];
     }
+
+    /**
+     * Todos os clientes ativos, paginados (200 por página).
+     *
+     * @return array<string, mixed>
+     */
+    public function getAllClientes(int $page = 1): array
+    {
+        $query = QueryBuilder::for('cliente.id')
+            ->page($page)
+            ->perPage(200)
+            ->sortBy('cliente.data_cadastro', 'desc')
+            ->filter('cliente.ativo', 'L', 'S');
+
+        return $this->query('/cliente', $query);
+    }
+
+    /**
+     * Um cliente ativo pelo ID, ou array vazio se não encontrado.
+     *
+     * @return array<string, mixed>
+     */
+    public function getClienteById(int $id): array
+    {
+        $query = QueryBuilder::for('cliente.id')
+            ->query($id)
+            ->perPage(200)
+            ->sortBy('cliente.data_cadastro', 'desc')
+            ->filter('cliente.ativo', 'L', 'S');
+
+        return $this->list('/cliente', $query)->first() ?? [];
+    }
+
+    /**
+     * Clientes ativos que fazem aniversário em $diasAntecedencia dias (0 = hoje).
+     *
+     * O IXC não suporta MONTH()/DAY() como valor de coluna comum — usamos essas
+     * expressões diretamente como nome de campo no grid_param, que a API aceita.
+     *
+     * @return list<array{id: mixed, id_cliente: mixed, razao: string, whatsapp: string, data_aniversario: string}>
+     */
+    public function getClientesAniversariantes(int $diasAntecedencia = 0): array
+    {
+        $data = date('Y-m-d', strtotime("+{$diasAntecedencia} days"));
+
+        $query = QueryBuilder::for('cliente.id')
+            ->operator('>=')
+            ->perPage(2000)
+            ->sortBy('cliente.razao', 'asc')
+            ->filter('cliente.ativo', '=', 'S')
+            ->filter('MONTH(cliente.data_nascimento)', '=', date('m', strtotime($data)))
+            ->filter('DAY(cliente.data_nascimento)', '=', date('d', strtotime($data)));
+
+        $registros = $this->list('/cliente', $query)->items;
+
+        return array_map(static fn (array $c): array => [
+            'id' => $c['id'],
+            'id_cliente' => $c['id'],
+            'razao' => $c['razao'] ?? '',
+            'whatsapp' => $c['whatsapp'] ?? '',
+            'data_aniversario' => $c['data_nascimento'] ?? '',
+        ], $registros);
+    }
 }

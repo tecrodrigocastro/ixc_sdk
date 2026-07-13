@@ -59,4 +59,33 @@ final class ComercialResourceTest extends TestCase
         $resource->getOsCortesia100('2024-07-01', '2024-07-31');
         $this->assertSame('78', $http->lastGridParam()[2]['P']);
     }
+
+    public function test_get_all_bloqueados_defaults_initial_date_to_today_when_omitted(): void
+    {
+        $http = new FakeHttpClient(['total' => 0, 'registros' => []]);
+        $resource = new ComercialResource($http);
+
+        $resource->getAllBloqueados();
+
+        $today = date('Y-m-d');
+        $filters = $http->lastGridParam();
+
+        $this->assertSame('cliente_contrato.status_internet', $filters[0]['TB']);
+        $this->assertSame('CA', $filters[0]['P']);
+        $this->assertSame('cliente_contrato.status', $filters[1]['TB']);
+        $this->assertSame('A', $filters[1]['P']);
+        $this->assertSame($today, $filters[2]['P']);
+        $this->assertSame($today, $filters[3]['P']);
+    }
+
+    public function test_get_all_bloqueados_accepts_explicit_initial_date(): void
+    {
+        $http = new FakeHttpClient(['total' => 0, 'registros' => []]);
+        $resource = new ComercialResource($http);
+
+        $resource->getAllBloqueados('2024-07-15');
+
+        $filters = $http->lastGridParam();
+        $this->assertSame('2024-07-15', $filters[2]['P']);
+    }
 }

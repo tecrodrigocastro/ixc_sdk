@@ -135,6 +135,32 @@ final class ComercialResource extends AbstractResource
         return $this->query('/cliente_contrato', $query);
     }
 
+    /**
+     * Contratos bloqueados automaticamente desde $data até hoje.
+     *
+     * Diferente de getContratosBloqueados(): também exige status='A' (contrato
+     * ainda ativo, apenas com a internet bloqueada), e aceita $data em qualquer
+     * formato reconhecido por strtotime() em vez de exigir Y-m-d.
+     *
+     * @param  string|null  $data  Data inicial. Se omitida, usa a data de hoje.
+     * @return array<string, mixed>
+     */
+    public function getAllBloqueados(?string $data = null): array
+    {
+        $initialDate = $data ? date('Y-m-d', strtotime($data)) : date('Y-m-d');
+        $finalDate = date('Y-m-d');
+
+        $query = QueryBuilder::for('cliente_contrato.id_cliente')
+            ->perPage(2000)
+            ->sortBy('cliente_contrato.id', 'asc')
+            ->filter('cliente_contrato.status_internet', '=', 'CA')
+            ->filter('cliente_contrato.status', '=', 'A')
+            ->filter('cliente_contrato.dt_ult_bloq_auto', '>=', $initialDate)
+            ->filter('cliente_contrato.dt_ult_bloq_auto', '<=', $finalDate);
+
+        return $this->query('/cliente_contrato', $query);
+    }
+
     // =========================================================================
     // VENDEDORES E PLANOS
     // =========================================================================
