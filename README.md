@@ -88,8 +88,10 @@ O provider é descoberto automaticamente via `composer.json extra.laravel.provid
 | `comercial()` | Contratos por período, vendedores, equipes, OS por tipo | `/cliente_contrato`, `/vd_contratos`, `/vendedor`, `/usuarios`, `/su_oss_chamado` |
 | `contrato()` | Planos de venda, TV | `/vd_contratos`, `/tv_usuarios` |
 | `estoque()` | Almoxarifado, saldo, produtos | `/almox_usuario`, `/view_prod_estoque_almox`, `/produtos` |
-| `financeiro()` | Pagamentos, faturas, desbloqueio de confiança | `/fn_areceber`, `/desbloqueio_confianca` |
+| `financeiro()` | Pagamentos, faturas, PIX, boletos, desbloqueio de confiança | `/fn_areceber`, `/desbloqueio_confianca`, `/get_pix`, `/get_boleto` |
+| `funcionario()` | Funcionários ativos | `/funcionarios` |
 | `os()` | Ordens de serviço, assuntos, diagnósticos, materiais | `/su_oss_chamado`, `/su_oss_assunto`, `/su_diagnostico`, `/movimento_produtos`, `/produtos`, `/radpop_radio` |
+| `ticket()` | Tickets/protocolos de atendimento | `/su_ticket` |
 | `veiculo()` | Frota e despesas | `/veiculos`, `/veiculos_despesas` |
 
 Cada método é documentado com PHPDoc (campos relevantes de retorno, exemplo de uso) diretamente na classe do resource correspondente em `src/Resources/`.
@@ -128,6 +130,18 @@ $ixc = new IxcClient($http);
 ```
 
 No Laravel, isso é habilitado automaticamente via `IXC_CACHE_ENABLED=true` (usa `Cache::store()`, que já implementa PSR-16).
+
+## Respostas binárias (PDF de boleto)
+
+Endpoints que devolvem arquivos (não JSON), como o boleto em PDF, usam `HttpClientInterface::getRaw()` em vez de `get()` — o corpo da resposta não é decodificado:
+
+```php
+$pdfBytes = $ixc->financeiro()->getBoletosByCliente(708492);
+
+file_put_contents('boleto.pdf', $pdfBytes);
+```
+
+`CachingHttpClient::getRaw()` nunca cacheia — documentos financeiros costumam ser recalculados a cada emissão.
 
 ## Erros
 
