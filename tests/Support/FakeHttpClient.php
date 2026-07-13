@@ -15,6 +15,8 @@ final class FakeHttpClient implements HttpClientInterface
     /** @var array<string, mixed>|null */
     public ?array $lastParams = null;
 
+    public string $rawResponse = '';
+
     /**
      * @param  array<string, mixed>  $response
      */
@@ -28,6 +30,14 @@ final class FakeHttpClient implements HttpClientInterface
         $this->lastParams = $params;
 
         return $this->response;
+    }
+
+    public function getRaw(string $endpoint, array $params): string
+    {
+        $this->lastEndpoint = $endpoint;
+        $this->lastParams = $params;
+
+        return $this->rawResponse;
     }
 
     /**

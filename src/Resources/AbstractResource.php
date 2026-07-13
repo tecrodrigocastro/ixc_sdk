@@ -41,4 +41,15 @@ abstract class AbstractResource
     {
         return $this->client->get($endpoint, $params);
     }
+
+    /**
+     * Chamada de baixo nível que devolve o corpo bruto da resposta sem
+     * decodificar como JSON (ex: /get_boleto, que retorna bytes de um PDF).
+     *
+     * @param  array<string, mixed>  $params
+     */
+    protected function bytes(string $endpoint, array $params): string
+    {
+        return $this->client->getRaw($endpoint, $params);
+    }
 }

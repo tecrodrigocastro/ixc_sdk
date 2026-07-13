@@ -6,6 +6,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\ClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\RequestOptions;
+use Psr\Http\Message\ResponseInterface;
 use RedRodrigo\IxcSdk\Contracts\HttpClientInterface;
 use RedRodrigo\IxcSdk\Exceptions\IxcRequestException;
 use RedRodrigo\IxcSdk\Exceptions\IxcResponseException;
@@ -31,8 +32,27 @@ final class GuzzleHttpClient implements HttpClientInterface
 
     public function get(string $endpoint, array $params): array
     {
+        $decoded = json_decode((string) $this->send($endpoint, $params)->getBody(), true);
+
+        if (! is_array($decoded)) {
+            throw new IxcResponseException('Resposta inválida da API do IXC Soft (JSON malformado ou vazio).');
+        }
+
+        return $decoded;
+    }
+
+    public function getRaw(string $endpoint, array $params): string
+    {
+        return (string) $this->send($endpoint, $params)->getBody();
+    }
+
+    /**
+     * @param  array<string, mixed>  $params
+     */
+    private function send(string $endpoint, array $params): ResponseInterface
+    {
         try {
-            $response = $this->http->request('GET', rtrim($this->baseUrl, '/').$endpoint, [
+            return $this->http->request('GET', rtrim($this->baseUrl, '/').$endpoint, [
                 RequestOptions::AUTH => [$this->userId, $this->token],
                 RequestOptions::HEADERS => [
                     'Content-type' => ['application/json', 'multipart/form-data', 'application/x-www-form-urlencoded', 'application/pdf'],
@@ -43,13 +63,5 @@ final class GuzzleHttpClient implements HttpClientInterface
         } catch (GuzzleException $exception) {
             throw IxcRequestException::fromGuzzleException($exception);
         }
-
-        $decoded = json_decode((string) $response->getBody(), true);
-
-        if (! is_array($decoded)) {
-            throw new IxcResponseException('Resposta inválida da API do IXC Soft (JSON malformado ou vazio).');
-        }
-
-        return $decoded;
     }
 }

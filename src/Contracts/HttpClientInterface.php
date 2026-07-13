@@ -23,4 +23,17 @@ interface HttpClientInterface
      * @throws IxcResponseException Resposta com corpo que não é um JSON válido
      */
     public function get(string $endpoint, array $params): array;
+
+    /**
+     * Como get(), mas devolve o corpo bruto da resposta sem tentar decodificar
+     * como JSON. Necessário para endpoints que retornam binário (ex: /get_boleto,
+     * que devolve os bytes de um PDF).
+     *
+     * @param  string  $endpoint  Caminho do endpoint IXC, ex: "/get_boleto"
+     * @param  array<string, mixed>  $params  Parâmetros da requisição
+     * @return string Corpo bruto da resposta
+     *
+     * @throws IxcRequestException Falha de transporte/HTTP
+     */
+    public function getRaw(string $endpoint, array $params): string;
 }

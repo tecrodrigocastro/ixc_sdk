@@ -58,4 +58,32 @@ final class GuzzleHttpClientTest extends TestCase
 
         $client->get('/cliente', ['qtype' => 'cliente.id']);
     }
+
+    public function test_get_raw_returns_body_without_decoding(): void
+    {
+        $pdfBytes = "%PDF-1.4\nnot really a pdf but binary-ish content";
+
+        $mock = new MockHandler([
+            new Response(200, [], $pdfBytes),
+        ]);
+
+        $client = new GuzzleHttpClient('https://ixc.example.com/webservice/v1', '129', 'secret', $this->makeClient($mock));
+
+        $result = $client->getRaw('/get_boleto', ['boletos' => 123]);
+
+        $this->assertSame($pdfBytes, $result);
+    }
+
+    public function test_get_raw_wraps_transport_failures_in_ixc_request_exception(): void
+    {
+        $mock = new MockHandler([
+            new ConnectException('Connection refused', new Request('GET', 'test')),
+        ]);
+
+        $client = new GuzzleHttpClient('https://ixc.example.com/webservice/v1', '129', 'secret', $this->makeClient($mock));
+
+        $this->expectException(IxcRequestException::class);
+
+        $client->getRaw('/get_boleto', ['boletos' => 123]);
+    }
 }

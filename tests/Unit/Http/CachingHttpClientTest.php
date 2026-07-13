@@ -34,4 +34,17 @@ final class CachingHttpClientTest extends TestCase
 
         $this->assertSame(2, $cache->setCalls);
     }
+
+    public function test_get_raw_delegates_without_caching(): void
+    {
+        $inner = new FakeHttpClient();
+        $inner->rawResponse = '%PDF-1.4 bytes';
+        $cache = new ArrayCache();
+        $client = new CachingHttpClient($inner, $cache);
+
+        $result = $client->getRaw('/get_boleto', ['boletos' => 123]);
+
+        $this->assertSame('%PDF-1.4 bytes', $result);
+        $this->assertSame(0, $cache->setCalls);
+    }
 }

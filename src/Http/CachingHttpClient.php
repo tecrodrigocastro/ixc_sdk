@@ -40,6 +40,15 @@ final class CachingHttpClient implements HttpClientInterface
         return $result;
     }
 
+    /**
+     * Respostas binárias (ex: PDF de boleto) não são cacheadas — costumam
+     * representar documentos financeiros recalculados a cada emissão.
+     */
+    public function getRaw(string $endpoint, array $params): string
+    {
+        return $this->inner->getRaw($endpoint, $params);
+    }
+
     private function cacheKey(string $endpoint, array $params): string
     {
         return 'ixc_sdk_'.md5($endpoint.'|'.serialize($params));
