@@ -10,6 +10,10 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  * Endpoint coberto:
  *   GET /su_ticket — tickets de atendimento
  *
+ * Campo `id_ticket_setor` identifica o setor/departamento responsável pelo
+ * ticket — útil para relatórios agrupados por setor sem precisar de outra
+ * consulta.
+ *
  * @see https://wikiixcsoft.ixcsoft.com.br/
  */
 final class TicketResource extends AbstractResource
@@ -34,6 +38,10 @@ final class TicketResource extends AbstractResource
     /**
      * Tickets criados em um período.
      *
+     * Ao contrário de su_oss_chamado, o endpoint /su_ticket não aceita os
+     * operadores 'GE'/'LE' no grid_param — a API responde com uma página HTML
+     * de erro em vez de JSON. Use '>=' e '<=', que funcionam normalmente aqui.
+     *
      * @return list<array<string, mixed>>
      */
     public function getTicketsByPeriod(string $dataInicial, string $dataFinal): array
@@ -41,8 +49,8 @@ final class TicketResource extends AbstractResource
         $query = QueryBuilder::for('su_ticket.id')
             ->perPage(2000)
             ->sortBy('su_ticket.id', 'desc')
-            ->filter('su_ticket.data_criacao', 'GE', $dataInicial)
-            ->filter('su_ticket.data_criacao', 'LE', $dataFinal);
+            ->filter('su_ticket.data_criacao', '>=', $dataInicial)
+            ->filter('su_ticket.data_criacao', '<=', $dataFinal);
 
         return $this->list('/su_ticket', $query)->items;
     }

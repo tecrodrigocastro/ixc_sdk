@@ -30,8 +30,22 @@ final class TicketResourceTest extends TestCase
 
         $this->assertSame([['id' => 1], ['id' => 2]], $result);
         $this->assertSame([
-            ['TB' => 'su_ticket.data_criacao', 'OP' => 'GE', 'P' => '2024-07-01'],
-            ['TB' => 'su_ticket.data_criacao', 'OP' => 'LE', 'P' => '2024-07-31'],
+            ['TB' => 'su_ticket.data_criacao', 'OP' => '>=', 'P' => '2024-07-01'],
+            ['TB' => 'su_ticket.data_criacao', 'OP' => '<=', 'P' => '2024-07-31'],
         ], $http->lastGridParam());
+    }
+
+    public function test_get_tickets_by_period_does_not_use_ge_le_operators(): void
+    {
+        // /su_ticket rejeita GE/LE no grid_param (a API responde com HTML de
+        // erro em vez de JSON), ao contrário de su_oss_chamado. Regressão.
+        $http = new FakeHttpClient(['registros' => []]);
+        $resource = new TicketResource($http);
+
+        $resource->getTicketsByPeriod('2024-07-01', '2024-07-31');
+
+        $operators = array_column($http->lastGridParam(), 'OP');
+        $this->assertNotContains('GE', $operators);
+        $this->assertNotContains('LE', $operators);
     }
 }
