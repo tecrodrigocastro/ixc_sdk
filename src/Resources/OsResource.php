@@ -83,6 +83,26 @@ final class OsResource extends AbstractResource
     }
 
     /**
+     * Todos os assuntos/tipos de OS cadastrados (tabela `su_oss_assunto`) —
+     * id → nome (ex: 2 => "CLIENTE SEM INTERNET").
+     *
+     * `su_oss_chamado.id_assunto` só traz o ID numérico, sem nome resolvido;
+     * use este método pra montar um cache local id→nome — tabela de
+     * referência pequena e estável (106 registros hoje), uma chamada só
+     * resolve tudo, mesmo padrão de `ClienteResource::getAllCidades()`.
+     *
+     * @return list<array{id: string, assunto: string}>
+     */
+    public function getAllAssuntosOs(): array
+    {
+        $query = QueryBuilder::for('su_oss_assunto.id')
+            ->perPage(2000)
+            ->sortBy('su_oss_assunto.id', 'asc');
+
+        return $this->list('/su_oss_assunto', $query)->items;
+    }
+
+    /**
      * Produtos/materiais utilizados em uma OS específica.
      */
     public function getProdutosByOs(string $idOs): array
