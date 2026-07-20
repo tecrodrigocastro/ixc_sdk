@@ -174,8 +174,12 @@ final class ClienteResource extends AbstractResource
      */
     public function getAllCidades(): array
     {
+        // O Brasil tem ~5570 municípios e o IXC cadastra a tabela cidade com
+        // a lista nacional inteira (confirmado: total real = 5564) — não é
+        // só as cidades onde o provedor atua. 10000 dá margem confortável
+        // sem precisar paginar (a API honra qualquer "rp" pedido, sem cap).
         $query = QueryBuilder::for('cidade.id')
-            ->perPage(2000)
+            ->perPage(10000)
             ->sortBy('cidade.id', 'asc');
 
         return $this->list('/cidade', $query)->items;
