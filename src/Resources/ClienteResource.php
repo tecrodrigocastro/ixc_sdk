@@ -11,6 +11,7 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  *   GET /cliente          — dados cadastrais
  *   GET /cliente_contrato — contratos de internet
  *   GET /radusuarios      — logins PPPoE
+ *   GET /cidade           — tabela de cidades (id → nome/UF)
  *
  * @see https://wikiixcsoft.ixcsoft.com.br/
  */
@@ -159,6 +160,25 @@ final class ClienteResource extends AbstractResource
             ->filter('cliente.ativo', 'L', 'S');
 
         return $this->list('/cliente', $query)->first() ?? [];
+    }
+
+    /**
+     * Todas as cidades cadastradas (tabela `cidade`) — id, nome e UF.
+     *
+     * O campo `cliente.cidade` retorna só o ID numérico da cidade, sem nome
+     * resolvido; use este método pra montar um cache local id→nome (a tabela
+     * é pequena e estável, uma chamada só resolve tudo — mesmo padrão já
+     * usado para técnicos em `FuncionarioResource::getAllFuncionarios()`).
+     *
+     * @return list<array{id: string, nome: string, uf: string}>
+     */
+    public function getAllCidades(): array
+    {
+        $query = QueryBuilder::for('cidade.id')
+            ->perPage(2000)
+            ->sortBy('cidade.id', 'asc');
+
+        return $this->list('/cidade', $query)->items;
     }
 
     /**
