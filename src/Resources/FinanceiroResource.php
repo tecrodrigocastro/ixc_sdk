@@ -129,6 +129,31 @@ final class FinanceiroResource extends AbstractResource
     }
 
     /**
+     * Faturas com vencimento dentro de uma faixa de datas (ambos os limites
+     * inclusos) — diferente de getClientesComFaturaVencida(), que só tem
+     * limite inferior e por isso devolve também títulos historicamente
+     * antigos (a base real da Orbe tem títulos em aberto desde 2017; como o
+     * resultado é ordenado do mais antigo pro mais recente e limitado a
+     * `rp=2000`, uma consulta sem teto superior corre o risco de nunca
+     * alcançar os vencimentos realmente recentes). Use este método quando
+     * precisar de uma janela específica (ex: "atraso entre 3 e 9 dias").
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getFaturasVencidasNoPeriodo(string $dataInicial, string $dataFinal): array
+    {
+        $query = QueryBuilder::for('fn_areceber.id_cliente')
+            ->perPage(2000)
+            ->sortBy('fn_areceber.data_vencimento', 'asc')
+            ->filter('fn_areceber.liberado', '=', 'S')
+            ->filter('fn_areceber.status', '=', 'A')
+            ->filter('fn_areceber.data_vencimento', '>=', $dataInicial)
+            ->filter('fn_areceber.data_vencimento', '<=', $dataFinal);
+
+        return $this->list('/fn_areceber', $query)->items;
+    }
+
+    /**
      * Faturas a vencer exatamente em $dias dias.
      *
      * @return list<array<string, mixed>>

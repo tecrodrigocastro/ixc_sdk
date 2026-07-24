@@ -42,6 +42,9 @@
             "providers": [
                 "RedRodrigo\\IxcSdk\\Laravel\\IxcServiceProvider"
             ]
+        },
+        "branch-alias": {
+            "dev-main": "0.4.x-dev"
         }
     },
     "config": {

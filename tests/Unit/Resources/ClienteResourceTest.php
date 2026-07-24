@@ -83,6 +83,41 @@ final class ClienteResourceTest extends TestCase
         $this->assertSame([], $resource->getClienteById(999));
     }
 
+    public function test_get_rad_cliente_por_username_queries_by_login_field(): void
+    {
+        $http = new FakeHttpClient(['registros' => [['id' => '99', 'login' => 'joaosilva', 'id_cliente' => '4321']]]);
+        $resource = new ClienteResource($http);
+
+        $result = $resource->getRadClientePorUsername('joaosilva');
+
+        $this->assertSame([['id' => '99', 'login' => 'joaosilva', 'id_cliente' => '4321']], $result);
+        $this->assertSame('/radusuarios', $http->lastEndpoint);
+        $this->assertSame('radusuarios.login', $http->lastParams['qtype']);
+        $this->assertSame('joaosilva', $http->lastParams['query']);
+    }
+
+    public function test_buscar_por_cpf_ou_telefone_tries_cpf_then_phones_until_one_hits(): void
+    {
+        $http = new FakeHttpClient(['registros' => []]);
+        $resource = new ClienteResource($http);
+
+        // Sem resultado em nenhum campo -> tentou os 3 campos, na ordem, e devolveu vazio
+        $this->assertSame([], $resource->buscarPorCpfOuTelefone('98168-5776'));
+        $this->assertSame('cliente.whatsapp', $http->lastParams['qtype']);
+    }
+
+    public function test_buscar_por_cpf_ou_telefone_stops_at_first_field_with_results(): void
+    {
+        $http = new FakeHttpClient(['registros' => [['id' => '1', 'cnpj_cpf' => '707.460.952-87']]]);
+        $resource = new ClienteResource($http);
+
+        $result = $resource->buscarPorCpfOuTelefone('707.460.952-87');
+
+        $this->assertSame([['id' => '1', 'cnpj_cpf' => '707.460.952-87']], $result);
+        $this->assertSame('cliente.cnpj_cpf', $http->lastParams['qtype']);
+        $this->assertSame('L', $http->lastParams['oper']);
+    }
+
     public function test_get_clientes_aniversariantes_maps_to_simplified_shape(): void
     {
         $http = new FakeHttpClient([

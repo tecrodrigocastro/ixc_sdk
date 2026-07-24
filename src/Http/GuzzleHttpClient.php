@@ -46,6 +46,17 @@ final class GuzzleHttpClient implements HttpClientInterface
         return (string) $this->send($endpoint, $params)->getBody();
     }
 
+    public function post(string $endpoint, array $fields): array
+    {
+        $decoded = json_decode((string) $this->sendPost($endpoint, $fields)->getBody(), true);
+
+        if (! is_array($decoded)) {
+            throw new IxcResponseException('Resposta inválida da API do IXC Soft (JSON malformado ou vazio).');
+        }
+
+        return $decoded;
+    }
+
     /**
      * @param  array<string, mixed>  $params
      */
@@ -59,6 +70,28 @@ final class GuzzleHttpClient implements HttpClientInterface
                     'ixcsoft' => 'listar',
                 ],
                 RequestOptions::BODY => json_encode($params, JSON_UNESCAPED_UNICODE),
+            ]);
+        } catch (GuzzleException $exception) {
+            throw IxcRequestException::fromGuzzleException($exception);
+        }
+    }
+
+    /**
+     * Escrita (inserir/editar/ação) — diferente de send(), não envia o header
+     * `ixcsoft: listar` (protocolo exclusivo de listagem) e o corpo é o mapa
+     * de campos do recurso, sem o envelope qtype/query/oper.
+     *
+     * @param  array<string, mixed>  $fields
+     */
+    private function sendPost(string $endpoint, array $fields): ResponseInterface
+    {
+        try {
+            return $this->http->request('POST', rtrim($this->baseUrl, '/').$endpoint, [
+                RequestOptions::AUTH => [$this->userId, $this->token],
+                RequestOptions::HEADERS => [
+                    'Content-type' => 'application/json',
+                ],
+                RequestOptions::BODY => json_encode($fields, JSON_UNESCAPED_UNICODE),
             ]);
         } catch (GuzzleException $exception) {
             throw IxcRequestException::fromGuzzleException($exception);

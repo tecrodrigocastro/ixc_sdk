@@ -86,4 +86,38 @@ final class GuzzleHttpClientTest extends TestCase
 
         $client->getRaw('/get_boleto', ['boletos' => 123]);
     }
+
+    public function test_post_sends_fields_as_json_body_and_decodes_response(): void
+    {
+        $captured = null;
+        $mock = new MockHandler([
+            function ($request) use (&$captured) {
+                $captured = $request;
+
+                return new Response(200, [], json_encode(['type' => 'success', 'id' => '999']));
+            },
+        ]);
+
+        $client = new GuzzleHttpClient('https://ixc.example.com/webservice/v1', '129', 'secret', $this->makeClient($mock));
+
+        $result = $client->post('/su_oss_chamado', ['tipo' => 'C', 'id_cliente' => '10']);
+
+        $this->assertSame(['type' => 'success', 'id' => '999'], $result);
+        $this->assertSame('POST', $captured->getMethod());
+        $this->assertSame(['tipo' => 'C', 'id_cliente' => '10'], json_decode((string) $captured->getBody(), true));
+        $this->assertFalse($captured->hasHeader('ixcsoft'));
+    }
+
+    public function test_post_wraps_transport_failures_in_ixc_request_exception(): void
+    {
+        $mock = new MockHandler([
+            new ConnectException('Connection refused', new Request('POST', 'test')),
+        ]);
+
+        $client = new GuzzleHttpClient('https://ixc.example.com/webservice/v1', '129', 'secret', $this->makeClient($mock));
+
+        $this->expectException(IxcRequestException::class);
+
+        $client->post('/su_oss_chamado', ['tipo' => 'C']);
+    }
 }

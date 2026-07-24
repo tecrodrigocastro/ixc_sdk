@@ -47,4 +47,16 @@ final class CachingHttpClientTest extends TestCase
         $this->assertSame('%PDF-1.4 bytes', $result);
         $this->assertSame(0, $cache->setCalls);
     }
+
+    public function test_post_delegates_without_caching(): void
+    {
+        $inner = new FakeHttpClient(['type' => 'success', 'id' => '1']);
+        $cache = new ArrayCache();
+        $client = new CachingHttpClient($inner, $cache);
+
+        $result = $client->post('/su_oss_chamado', ['tipo' => 'C']);
+
+        $this->assertSame(['type' => 'success', 'id' => '1'], $result);
+        $this->assertSame(0, $cache->setCalls);
+    }
 }

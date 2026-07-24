@@ -36,4 +36,18 @@ interface HttpClientInterface
      * @throws IxcRequestException Falha de transporte/HTTP
      */
     public function getRaw(string $endpoint, array $params): string;
+
+    /**
+     * Grava dados na API do IXC Soft (inserir/editar/ação). Diferente de
+     * get(), o corpo é o mapa de campos direto do recurso — o IXC não usa o
+     * protocolo qtype/query/oper para escrita.
+     *
+     * @param  string  $endpoint  Caminho do endpoint IXC, ex: "/su_oss_chamado"
+     * @param  array<string, mixed>  $fields  Campos do recurso a gravar
+     * @return array<string, mixed> Corpo da resposta decodificado
+     *
+     * @throws IxcRequestException  Falha de transporte/HTTP
+     * @throws IxcResponseException Resposta com corpo que não é um JSON válido
+     */
+    public function post(string $endpoint, array $fields): array;
 }

@@ -87,12 +87,17 @@ O provider é descoberto automaticamente via `composer.json extra.laravel.provid
 | `cliente()` | Clientes, contratos, login PPPoE | `/cliente`, `/cliente_contrato`, `/radusuarios` |
 | `comercial()` | Contratos por período, vendedores, equipes, OS por tipo | `/cliente_contrato`, `/vd_contratos`, `/vendedor`, `/usuarios`, `/su_oss_chamado` |
 | `contrato()` | Planos de venda, TV | `/vd_contratos`, `/tv_usuarios` |
-| `estoque()` | Almoxarifado, saldo, produtos | `/almox_usuario`, `/view_prod_estoque_almox`, `/produtos` |
+| `estoque()` | Almoxarifado, saldo, produtos, transferência entre almoxarifados | `/almox_usuario`, `/view_prod_estoque_almox`, `/produtos`, `/almox`, `/transf_almox_top`, `/transf_almox_item` |
 | `financeiro()` | Pagamentos, faturas, PIX, boletos, desbloqueio de confiança | `/fn_areceber`, `/desbloqueio_confianca`, `/get_pix`, `/get_boleto` |
 | `funcionario()` | Funcionários ativos | `/funcionarios` |
-| `os()` | Ordens de serviço, assuntos, diagnósticos, materiais | `/su_oss_chamado`, `/su_oss_assunto`, `/su_diagnostico`, `/movimento_produtos`, `/produtos`, `/radpop_radio` |
+| `os()` | Ordens de serviço, assuntos, diagnósticos, materiais, abertura de OS (escrita) | `/su_oss_chamado` (GET+POST), `/su_oss_assunto`, `/su_diagnostico`, `/movimento_produtos`, `/produtos`, `/radpop_radio` |
 | `ticket()` | Tickets/protocolos de atendimento | `/su_ticket` |
 | `veiculo()` | Frota e despesas | `/veiculos`, `/veiculos_despesas` |
+| `radius()` | Log de conexão (quedas, sessões) | `/radacct` |
+| `requisicaoMaterial()` | Requisição de material e devolução/transferência com confirmação | `/requisicao_material`, `/requisicao_material_item`, `/requisicao_devolucao_material`, `/itens_requisicao_devolucao_material` |
+| `comodato()` | Comodato de equipamento (contrato e dentro da OS) | `/cliente_contrato_comodato`, `/su_oss_mov_comodato_wiz` |
+| `patrimonio()` | Cadastro de patrimônio | `/patrimonio` |
+| `entradaEstoque()` | Entrada de estoque, requisição e pedido de compra | `/entrada`, `/requisicao_compra(_itens)`, `/pedido_compra(_itens)` |
 
 Cada método é documentado com PHPDoc (campos relevantes de retorno, exemplo de uso) diretamente na classe do resource correspondente em `src/Resources/`.
 
@@ -142,6 +147,20 @@ file_put_contents('boleto.pdf', $pdfBytes);
 ```
 
 `CachingHttpClient::getRaw()` nunca cacheia — documentos financeiros costumam ser recalculados a cada emissão.
+
+## Escrita (POST)
+
+A maior parte da SDK é somente leitura, mas alguns recursos precisam gravar dados na IXC (ex: abrir uma OS preventiva). Isso passa por `HttpClientInterface::post()`, que envia o corpo como o mapa de campos do recurso — diferente de `get()`, o IXC **não** usa o protocolo `qtype/query/oper` para escrita, e a chamada não é cacheada (nem por `CachingHttpClient`, que só cacheia leitura):
+
+```php
+$resposta = $ixc->os()->abrirOsPreventiva(
+    idCliente: '2241',
+    idAssunto: '12',
+    mensagem: 'OS aberta automaticamente: 8 quedas curtas nas últimas 24h.',
+);
+```
+
+Use com cautela — é uma ação real no ERP de produção, não uma simulação.
 
 ## Erros
 

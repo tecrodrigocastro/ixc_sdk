@@ -52,4 +52,16 @@ abstract class AbstractResource
     {
         return $this->client->getRaw($endpoint, $params);
     }
+
+    /**
+     * Insere/edita/executa uma ação de escrita. O IXC não usa o protocolo
+     * qtype/query/oper para escrita — os campos vão direto no corpo.
+     *
+     * @param  array<string, mixed>  $fields
+     * @return array<string, mixed>
+     */
+    protected function insert(string $endpoint, array $fields): array
+    {
+        return $this->client->post($endpoint, $fields);
+    }
 }

@@ -44,6 +44,23 @@ final class FinanceiroResourceTest extends TestCase
         $this->assertSame(date('Y-m-d', strtotime('-5 days')), $filters[3]['P']);
     }
 
+    public function test_get_faturas_vencidas_no_periodo_filters_by_date_range(): void
+    {
+        $http = new FakeHttpClient(['registros' => [['id' => 1, 'data_vencimento' => '2026-07-15']]]);
+        $resource = new FinanceiroResource($http);
+
+        $result = $resource->getFaturasVencidasNoPeriodo('2026-07-10', '2026-07-16');
+
+        $this->assertSame([['id' => 1, 'data_vencimento' => '2026-07-15']], $result);
+        $filters = $http->lastGridParam();
+        $this->assertSame('fn_areceber.data_vencimento', $filters[2]['TB']);
+        $this->assertSame('>=', $filters[2]['OP']);
+        $this->assertSame('2026-07-10', $filters[2]['P']);
+        $this->assertSame('fn_areceber.data_vencimento', $filters[3]['TB']);
+        $this->assertSame('<=', $filters[3]['OP']);
+        $this->assertSame('2026-07-16', $filters[3]['P']);
+    }
+
     public function test_get_clientes_com_fatura_a_vencer_uses_days_ahead(): void
     {
         $http = new FakeHttpClient(['registros' => []]);

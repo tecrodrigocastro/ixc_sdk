@@ -14,16 +14,17 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  *   'AG' = Agendado | 'F' = Fechado | 'C' = Cancelado | 'A' = Aberto
  *
  * Endpoints cobertos:
- *   GET /su_oss_chamado     — ordens de serviço
- *   GET /su_oss_assunto     — tipos/assuntos de OS
- *   GET /su_diagnostico     — diagnósticos de OS
- *   GET /movimento_produtos — materiais/produtos utilizados
- *   GET /produtos           — catálogo de produtos
- *   GET /radpop_radio       — equipamentos rádio/fibra
+ *   GET  /su_oss_chamado     — ordens de serviço
+ *   POST /su_oss_chamado     — abertura de OS (escrita — ver abrirOsPreventiva())
+ *   GET  /su_oss_assunto     — tipos/assuntos de OS
+ *   GET  /su_diagnostico     — diagnósticos de OS
+ *   GET  /movimento_produtos — materiais/produtos utilizados
+ *   GET  /produtos           — catálogo de produtos
+ *   GET  /radpop_radio       — equipamentos rádio/fibra
  *
  * Dados de referência (assunto, diagnóstico, produto) raramente mudam — se
  * quiser cache, envolva o HttpClientInterface injetado com
- * RedRodrigo\IxcSdk\Http\CachingHttpClient.
+ * RedRodrigo\IxcSdk\Http\CachingHttpClient (nunca aplicado à escrita).
  *
  * @see https://wikiixcsoft.ixcsoft.com.br/
  */
@@ -157,7 +158,10 @@ final class OsResource extends AbstractResource
             ->sortBy('su_oss_chamado.data_abertura', 'desc')
             ->filter('su_oss_chamado.data_abertura', '>=', $dataInicial)
             ->filter('su_oss_chamado.data_abertura', '<=', $dataFinal)
-            ->filter('su_oss_chamado.status', '<>', 'C');
+            // A API do IXC não aceita "<>" como operador de grid_param (retorna
+            // erro/JSON malformado) — confirmado contra a API real da Orbe em
+            // 2026-07-24. "!=" é o operador correto de diferença.
+            ->filter('su_oss_chamado.status', '!=', 'C');
 
         return $this->list('/su_oss_chamado', $query)->items;
     }
@@ -211,5 +215,36 @@ final class OsResource extends AbstractResource
         }
 
         return $this->list('/su_oss_chamado', $query)->items;
+    }
+
+    /**
+     * Abre uma OS de cliente (tipo 'C') com status 'A' (Aberto) — usado pelo
+     * módulo de Retenção para criar OS preventivas quando a IA detecta risco
+     * alto de degradação de rede (US-1.3 do PRD de Retenção). Escrita real na
+     * IXC — não chamar a partir de fluxos somente-leitura (ex: Auditor Orbe).
+     *
+     * @param  string  $origemEndereco  'M' = endereço do cliente, 'E' = estrutura
+     * @return array<string, mixed> Corpo da resposta do IXC (inclui o ID criado)
+     */
+    public function abrirOsPreventiva(
+        string $idCliente,
+        string $idAssunto,
+        string $mensagem,
+        string $idFilial = '1',
+        string $prioridade = '1',
+        string $setor = '1',
+        string $origemEndereco = 'M',
+    ): array {
+        return $this->insert('/su_oss_chamado', [
+            'tipo' => 'C',
+            'id_assunto' => $idAssunto,
+            'id_cliente' => $idCliente,
+            'id_filial' => $idFilial,
+            'origem_endereco' => $origemEndereco,
+            'prioridade' => $prioridade,
+            'setor' => $setor,
+            'status' => 'A',
+            'mensagem' => $mensagem,
+        ]);
     }
 }

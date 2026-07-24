@@ -8,8 +8,11 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  * Contratos de venda e serviços adicionais — IXC Soft.
  *
  * Endpoints cobertos:
- *   GET /vd_contratos — planos/contratos de venda
- *   GET /tv_usuarios  — dados de TV por contrato
+ *   GET /vd_contratos              — planos/contratos de venda
+ *   GET /tv_usuarios               — dados de TV por contrato
+ *   GET /cliente_contrato_historico — histórico de eventos do contrato (renovação, mudanças)
+ *   GET /cliente_contrato_descontos — descontos aplicados ao contrato
+ *   GET /cliente_contrato_servicos  — acréscimos/descontos de serviço ('A'/'D' em tipo_acres_desc)
  *
  * @see https://wikiixcsoft.ixcsoft.com.br/
  */
@@ -44,5 +47,54 @@ final class ContratoResource extends AbstractResource
             ->sortBy('tv_usuarios.id', 'desc');
 
         return $this->list('/tv_usuarios', $query)->items;
+    }
+
+    /**
+     * Histórico de eventos de um contrato (renovações, mudanças de plano
+     * etc.), mais recente primeiro — usado para calcular o Lifespan do
+     * cliente na classificação de risco do módulo de Retenção.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getHistoricoContrato(string $idContrato): array
+    {
+        $query = QueryBuilder::for('cliente_contrato_historico.id_contrato')
+            ->query($idContrato)
+            ->perPage(200)
+            ->sortBy('cliente_contrato_historico.id', 'desc');
+
+        return $this->list('/cliente_contrato_historico', $query)->items;
+    }
+
+    /**
+     * Descontos aplicados a um contrato.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getDescontosContrato(string $idContrato): array
+    {
+        $query = QueryBuilder::for('cliente_contrato_descontos.id_contrato')
+            ->query($idContrato)
+            ->perPage(200)
+            ->sortBy('cliente_contrato_descontos.id', 'desc');
+
+        return $this->list('/cliente_contrato_descontos', $query)->items;
+    }
+
+    /**
+     * Serviços adicionais (acréscimos/descontos) de um contrato.
+     *
+     * @param  string  $tipo  'A' = acréscimo, 'D' = desconto
+     * @return list<array<string, mixed>>
+     */
+    public function getServicosAdicionais(string $idContrato, string $tipo = 'A'): array
+    {
+        $query = QueryBuilder::for('cliente_contrato_servicos.tipo_acres_desc')
+            ->query($tipo)
+            ->perPage(200)
+            ->sortBy('cliente_contrato_servicos.id', 'desc')
+            ->filter('cliente_contrato_servicos.id_contrato', '=', $idContrato);
+
+        return $this->list('/cliente_contrato_servicos', $query)->items;
     }
 }

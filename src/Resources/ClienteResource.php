@@ -37,6 +37,36 @@ final class ClienteResource extends AbstractResource
     }
 
     /**
+     * Busca clientes por CPF/CNPJ ou telefone (celular/WhatsApp) — usado
+     * quando searchCliente() (id exato ou nome) não encontra nada, típico do
+     * Cockpit de Retenção (operador identifica o cliente pelo número que ligou
+     * ou pelo CPF informado). A IXC guarda CPF/telefone com máscara (ex:
+     * "707.460.952-87", "(81) 98168-5776") — o termo é comparado como
+     * substring literal (LIKE), então funciona melhor com o número/CPF
+     * digitado igual ao cadastro; dígitos sem máscara podem não bater.
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function buscarPorCpfOuTelefone(string $termo): array
+    {
+        foreach (['cliente.cnpj_cpf', 'cliente.telefone_celular', 'cliente.whatsapp'] as $campo) {
+            $query = QueryBuilder::for($campo)
+                ->query($termo)
+                ->operator('L')
+                ->perPage(5)
+                ->sortBy('cliente.id', 'desc');
+
+            $resultado = $this->list('/cliente', $query)->items;
+
+            if (! empty($resultado)) {
+                return $resultado;
+            }
+        }
+
+        return [];
+    }
+
+    /**
      * Retorna todos os contratos de internet vinculados a um cliente.
      *
      * @return list<array<string, mixed>>
@@ -75,6 +105,24 @@ final class ClienteResource extends AbstractResource
     {
         $query = QueryBuilder::for('radusuarios.id')
             ->query($idLogin)
+            ->perPage(20)
+            ->sortBy('radusuarios.id', 'desc');
+
+        return $this->list('/radusuarios', $query)->items;
+    }
+
+    /**
+     * Retorna os dados de login PPPoE pelo login (texto) — diferente de
+     * getRadClientePorLogin(), que busca pelo ID interno de `radusuarios`.
+     * Resolve o caminho `radacct.username → id_cliente` usado pelo
+     * monitoramento de rede (radacct só traz o username, não o ID).
+     *
+     * @return list<array<string, mixed>>
+     */
+    public function getRadClientePorUsername(string $username): array
+    {
+        $query = QueryBuilder::for('radusuarios.login')
+            ->query($username)
             ->perPage(20)
             ->sortBy('radusuarios.id', 'desc');
 

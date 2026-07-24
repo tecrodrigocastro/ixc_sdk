@@ -6,11 +6,16 @@ use RedRodrigo\IxcSdk\Contracts\HttpClientInterface;
 use RedRodrigo\IxcSdk\Http\GuzzleHttpClient;
 use RedRodrigo\IxcSdk\Resources\ClienteResource;
 use RedRodrigo\IxcSdk\Resources\ComercialResource;
+use RedRodrigo\IxcSdk\Resources\ComodatoResource;
 use RedRodrigo\IxcSdk\Resources\ContratoResource;
+use RedRodrigo\IxcSdk\Resources\EntradaEstoqueResource;
 use RedRodrigo\IxcSdk\Resources\EstoqueResource;
 use RedRodrigo\IxcSdk\Resources\FinanceiroResource;
 use RedRodrigo\IxcSdk\Resources\FuncionarioResource;
 use RedRodrigo\IxcSdk\Resources\OsResource;
+use RedRodrigo\IxcSdk\Resources\PatrimonioResource;
+use RedRodrigo\IxcSdk\Resources\RadiusResource;
+use RedRodrigo\IxcSdk\Resources\RequisicaoMaterialResource;
 use RedRodrigo\IxcSdk\Resources\TicketResource;
 use RedRodrigo\IxcSdk\Resources\VeiculoResource;
 
@@ -45,6 +50,16 @@ final class IxcClient
     private ?TicketResource $ticket = null;
 
     private ?VeiculoResource $veiculo = null;
+
+    private ?RadiusResource $radius = null;
+
+    private ?RequisicaoMaterialResource $requisicaoMaterial = null;
+
+    private ?ComodatoResource $comodato = null;
+
+    private ?PatrimonioResource $patrimonio = null;
+
+    private ?EntradaEstoqueResource $entradaEstoque = null;
 
     public function __construct(private readonly HttpClientInterface $http)
     {
@@ -98,5 +113,30 @@ final class IxcClient
     public function veiculo(): VeiculoResource
     {
         return $this->veiculo ??= new VeiculoResource($this->http);
+    }
+
+    public function radius(): RadiusResource
+    {
+        return $this->radius ??= new RadiusResource($this->http);
+    }
+
+    public function requisicaoMaterial(): RequisicaoMaterialResource
+    {
+        return $this->requisicaoMaterial ??= new RequisicaoMaterialResource($this->http);
+    }
+
+    public function comodato(): ComodatoResource
+    {
+        return $this->comodato ??= new ComodatoResource($this->http);
+    }
+
+    public function patrimonio(): PatrimonioResource
+    {
+        return $this->patrimonio ??= new PatrimonioResource($this->http);
+    }
+
+    public function entradaEstoque(): EntradaEstoqueResource
+    {
+        return $this->entradaEstoque ??= new EntradaEstoqueResource($this->http);
     }
 }

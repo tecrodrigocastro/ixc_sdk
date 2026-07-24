@@ -40,6 +40,14 @@ final class FakeHttpClient implements HttpClientInterface
         return $this->rawResponse;
     }
 
+    public function post(string $endpoint, array $fields): array
+    {
+        $this->lastEndpoint = $endpoint;
+        $this->lastParams = $fields;
+
+        return $this->response;
+    }
+
     /**
      * @return list<array{TB: string, OP: string, P: string|int}>
      */

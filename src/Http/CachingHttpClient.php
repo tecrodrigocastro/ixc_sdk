@@ -49,6 +49,14 @@ final class CachingHttpClient implements HttpClientInterface
         return $this->inner->getRaw($endpoint, $params);
     }
 
+    /**
+     * Escrita nunca é cacheada — cada chamada precisa chegar de fato na API.
+     */
+    public function post(string $endpoint, array $fields): array
+    {
+        return $this->inner->post($endpoint, $fields);
+    }
+
     private function cacheKey(string $endpoint, array $params): string
     {
         return 'ixc_sdk_'.md5($endpoint.'|'.serialize($params));
