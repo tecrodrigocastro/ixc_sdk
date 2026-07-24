@@ -131,12 +131,13 @@ final class FinanceiroResource extends AbstractResource
     /**
      * Faturas com vencimento dentro de uma faixa de datas (ambos os limites
      * inclusos) — diferente de getClientesComFaturaVencida(), que só tem
-     * limite inferior e por isso devolve também títulos historicamente
-     * antigos (a base real da Orbe tem títulos em aberto desde 2017; como o
-     * resultado é ordenado do mais antigo pro mais recente e limitado a
-     * `rp=2000`, uma consulta sem teto superior corre o risco de nunca
-     * alcançar os vencimentos realmente recentes). Use este método quando
-     * precisar de uma janela específica (ex: "atraso entre 3 e 9 dias").
+     * limite inferior e por isso pode devolver também títulos historicamente
+     * muito antigos (bases com anos de histórico costumam ter títulos em
+     * aberto de anos atrás; como o resultado é ordenado do mais antigo pro
+     * mais recente e limitado a `rp=2000`, uma consulta sem teto superior
+     * corre o risco de nunca alcançar os vencimentos realmente recentes).
+     * Use este método quando precisar de uma janela específica (ex: "atraso
+     * entre 3 e 9 dias").
      *
      * @return list<array<string, mixed>>
      */

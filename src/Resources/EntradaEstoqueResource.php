@@ -14,13 +14,20 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  *   GET /pedido_compra         — pedido de compra (cabeçalho)
  *   GET /pedido_compra_itens   — itens do pedido de compra
  *
- * Validado contra a API real da Orbe em 2026-07-23: todos os 5 endpoints
- * acessíveis com dado real (947 entradas, 9 requisições, 11 pedidos).
+ * `/entrada` não tem endpoint de itens/produtos — é só o cabeçalho da nota
+ * fiscal (fornecedor, valor total, datas). Pra saber quais produtos entraram,
+ * use `getItensPedidoCompra()`/`getItensRequisicaoCompra()`.
  *
  * O campo de data de `/entrada` não foi confirmado contra a documentação —
  * getEntradas() lista por ID (mais recente primeiro) em vez de filtrar por
  * período; valide o nome exato do campo de data antes de trocar por um
  * filtro de intervalo.
+ *
+ * Em testes reais, `/requisicao_compra_itens` retornou uma página HTML de
+ * erro (não JSON) pro usuário de API usado, enquanto `/pedido_compra_itens`
+ * funcionou normalmente — nem todo par "cabeçalho + itens" do IXC vem
+ * necessariamente liberado igual; não assuma que um funcionando implica o
+ * outro também funcionar, valide os dois separadamente no seu provedor.
  *
  * `id_requisicao_compra`/`id_pedido_compra` nos itens seguem a mesma
  * convenção de nomenclatura usada em `requisicao_material_item.id_requisicao`

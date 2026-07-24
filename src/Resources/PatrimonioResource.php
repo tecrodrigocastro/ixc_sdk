@@ -10,8 +10,8 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  * Endpoint coberto (somente leitura):
  *   GET /patrimonio — cadastro de equipamentos tombados como patrimônio
  *
- * Validado contra a API real da Orbe em 2026-07-23: acessível, 3.545
- * registros retornados.
+ * Validado contra a API real: acessível, retorna os registros de patrimônio
+ * cadastrados normalmente.
  *
  * @see https://wikiixcsoft.ixcsoft.com.br/
  */

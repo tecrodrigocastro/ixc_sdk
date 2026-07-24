@@ -15,9 +15,10 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  * endpoints): 'E' = Entregue (em posse do cliente) | outros valores indicam
  * devolvido/baixado — ver `ComodatoResource::getComodatoPendenteByOs()`.
  *
- * Bloqueados (resposta HTML de erro, não JSON) para o usuário de API da
- * Orbe em 2026-07-23 — validar com o suporte IXC Soft antes de depender
- * deles em produção (afeta diretamente o RF-09 do Auditor Orbe).
+ * Nem todo provedor libera esses dois endpoints pro usuário de API — em
+ * testes reais, ambos retornaram uma página HTML de erro (não JSON) em vez
+ * de dado. Se isso acontecer, valide com o suporte do IXC Soft se o plano/
+ * usuário tem acesso liberado antes de depender deles em produção.
  *
  * @see https://wikiixcsoft.ixcsoft.com.br/
  */
@@ -40,8 +41,8 @@ final class ComodatoResource extends AbstractResource
 
     /**
      * Comodato entregue (status_comodato = 'E') ainda em aberto em uma OS —
-     * usado na verificação em 3 pontas do RF-09 (saída de estoque × comodato
-     * do cliente × declaração do técnico).
+     * útil pra cruzar saída de estoque × comodato do cliente × declaração do
+     * técnico numa auditoria de equipamento.
      *
      * @return list<array<string, mixed>>
      */

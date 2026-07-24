@@ -37,13 +37,13 @@ final class ClienteResource extends AbstractResource
     }
 
     /**
-     * Busca clientes por CPF/CNPJ ou telefone (celular/WhatsApp) — usado
-     * quando searchCliente() (id exato ou nome) não encontra nada, típico do
-     * Cockpit de Retenção (operador identifica o cliente pelo número que ligou
-     * ou pelo CPF informado). A IXC guarda CPF/telefone com máscara (ex:
-     * "707.460.952-87", "(81) 98168-5776") — o termo é comparado como
-     * substring literal (LIKE), então funciona melhor com o número/CPF
-     * digitado igual ao cadastro; dígitos sem máscara podem não bater.
+     * Busca clientes por CPF/CNPJ ou telefone (celular/WhatsApp) — útil
+     * quando searchCliente() (id exato ou nome) não encontra nada, típico de
+     * um atendente identificando o cliente pelo número que ligou ou pelo CPF
+     * informado. A IXC guarda CPF/telefone com máscara (ex: "707.460.952-87",
+     * "(81) 98168-5776") — o termo é comparado como substring literal (LIKE),
+     * então funciona melhor com o número/CPF digitado igual ao cadastro;
+     * dígitos sem máscara podem não bater.
      *
      * @return list<array<string, mixed>>
      */

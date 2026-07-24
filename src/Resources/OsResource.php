@@ -159,8 +159,8 @@ final class OsResource extends AbstractResource
             ->filter('su_oss_chamado.data_abertura', '>=', $dataInicial)
             ->filter('su_oss_chamado.data_abertura', '<=', $dataFinal)
             // A API do IXC não aceita "<>" como operador de grid_param (retorna
-            // erro/JSON malformado) — confirmado contra a API real da Orbe em
-            // 2026-07-24. "!=" é o operador correto de diferença.
+            // erro/JSON malformado) — confirmado contra a API real. "!=" é o
+            // operador correto de diferença.
             ->filter('su_oss_chamado.status', '!=', 'C');
 
         return $this->list('/su_oss_chamado', $query)->items;
@@ -218,10 +218,11 @@ final class OsResource extends AbstractResource
     }
 
     /**
-     * Abre uma OS de cliente (tipo 'C') com status 'A' (Aberto) — usado pelo
-     * módulo de Retenção para criar OS preventivas quando a IA detecta risco
-     * alto de degradação de rede (US-1.3 do PRD de Retenção). Escrita real na
-     * IXC — não chamar a partir de fluxos somente-leitura (ex: Auditor Orbe).
+     * Abre uma OS de cliente (tipo 'C') com status 'A' (Aberto) — útil, por
+     * exemplo, pra automações de retenção que abrem uma OS preventiva quando
+     * algum critério de risco (ex: degradação de sinal/rede) é detectado.
+     * Escrita real na IXC — não chamar a partir de fluxos que devem
+     * permanecer somente-leitura.
      *
      * @param  string  $origemEndereco  'M' = endereço do cliente, 'E' = estrutura
      * @return array<string, mixed> Corpo da resposta do IXC (inclui o ID criado)

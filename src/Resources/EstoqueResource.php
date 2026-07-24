@@ -20,15 +20,16 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  *   GET /transf_almox_top        — transferências entre almoxarifados (cabeçalho)
  *   GET /transf_almox_item       — itens de uma transferência entre almoxarifados
  *
- * Validado contra a API real da Orbe em 2026-07-25: `/transf_almox_top`
- * está bloqueado (resposta HTML de erro, não JSON) para o usuário de API da
- * Orbe — não usar getTransferenciasByPeriodo()/getItensTransferencia() com
- * um ID vindo dele em produção. `/transf_almox_item` (sem filtro de
- * cabeçalho) FUNCIONA normalmente (456k+ registros, campos confirmados: id,
- * id_produto, qtde, id_transf_almox, id_patrimonio, id_unidade,
- * fator_conversao, unidade_sigla, id_requisicao_material_item — não tem
- * campo de data próprio) — use getAllItensTransferencia() pra coletar como
- * snapshot paginado por ID em vez de por período/cabeçalho.
+ * Em testes reais, `/transf_almox_top` retornou uma página HTML de erro (não
+ * JSON) pro usuário de API usado — se acontecer o mesmo com você, não conte
+ * com getTransferenciasByPeriodo()/getItensTransferencia() com um ID vindo
+ * dele em produção sem antes confirmar acesso com o suporte do IXC Soft.
+ * `/transf_almox_item` (sem filtro de cabeçalho) funcionou normalmente nesses
+ * mesmos testes (campos confirmados: id, id_produto, qtde, id_transf_almox,
+ * id_patrimonio, id_unidade, fator_conversao, unidade_sigla,
+ * id_requisicao_material_item — não tem campo de data próprio) — use
+ * getAllItensTransferencia() pra coletar como snapshot paginado por ID em
+ * vez de por período/cabeçalho.
  *
  * @see https://wikiixcsoft.ixcsoft.com.br/
  */
@@ -123,9 +124,9 @@ final class EstoqueResource extends AbstractResource
     /**
      * Produtos/patrimônios movimentados em uma transferência entre almoxarifados.
      *
-     * Requer o id da transferência (transf_almox_top) — como esse endpoint
-     * está bloqueado na Orbe, prefira getAllItensTransferencia() quando não
-     * tiver esse ID disponível de outra fonte.
+     * Requer o id da transferência (transf_almox_top) — se esse endpoint
+     * estiver bloqueado no seu provedor, prefira getAllItensTransferencia()
+     * quando não tiver esse ID disponível de outra fonte.
      *
      * @return list<array<string, mixed>>
      */
@@ -143,7 +144,8 @@ final class EstoqueResource extends AbstractResource
      * Lista paginada de todos os itens de transferência entre almoxarifados,
      * mais recente primeiro. Sem filtro de período — `transf_almox_item` não
      * tem campo de data próprio (a data fica só no cabeçalho `transf_almox_top`,
-     * que está bloqueado na Orbe). Colete como snapshot incremental por ID.
+     * que pode estar indisponível dependendo do provedor). Colete como
+     * snapshot incremental por ID.
      *
      * @return list<array<string, mixed>>
      */

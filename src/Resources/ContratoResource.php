@@ -51,8 +51,8 @@ final class ContratoResource extends AbstractResource
 
     /**
      * Histórico de eventos de um contrato (renovações, mudanças de plano
-     * etc.), mais recente primeiro — usado para calcular o Lifespan do
-     * cliente na classificação de risco do módulo de Retenção.
+     * etc.), mais recente primeiro — útil pra calcular há quanto tempo o
+     * cliente está na base (tempo de casa) numa análise de risco de churn.
      *
      * @return list<array<string, mixed>>
      */

@@ -13,11 +13,13 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  *   GET /requisicao_devolucao_material     — devolução/transferência com confirmação
  *   GET /itens_requisicao_devolucao_material — itens da devolução
  *
- * Validado contra a API real da Orbe em 2026-07-23: `/requisicao_material` e
- * `/requisicao_material_item` acessíveis com dado real (253k+ itens);
+ * Validado contra a API real: `/requisicao_material` e
+ * `/requisicao_material_item` acessíveis com dado real. Em testes,
  * `/requisicao_devolucao_material` retornou "usuário não possui um
- * almoxarifado padrão" — falta de configuração no cadastro do usuário da API
- * no IXC, não bloqueio de acesso.
+ * almoxarifado padrão" — isso é falta de configuração no cadastro do usuário
+ * da API no IXC (o admin do provedor precisa definir um almoxarifado padrão
+ * pra esse usuário, ou informar `id_almoxarifado` explícito no filtro), não
+ * bloqueio de acesso.
  *
  * @see https://wikiixcsoft.ixcsoft.com.br/
  */
