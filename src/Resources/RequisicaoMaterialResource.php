@@ -13,9 +13,21 @@ use RedRodrigo\IxcSdk\Query\QueryBuilder;
  *   GET /requisicao_devolucao_material     — devolução/transferência com confirmação
  *   GET /itens_requisicao_devolucao_material — itens da devolução
  *
- * Validado contra a API real: `/requisicao_material` e
- * `/requisicao_material_item` acessíveis com dado real. Em testes,
- * `/requisicao_devolucao_material` retornou "usuário não possui um
+ * `/requisicao_material_item` validado com dado real e de alto volume.
+ * `/requisicao_material` (cabeçalho) tem comportamento inconsistente
+ * confirmado em pelo menos uma instância real: responde 200 com
+ * `{"total":"0"}` mesmo filtrando por um `id` sabidamente existente
+ * (referenciado por item real em `/requisicao_material_item`), em qualquer
+ * combinação de filtro testada, e uma tentativa chegou a devolver JSON
+ * malformado. Não é falta de dado (o item confirma que o cabeçalho existe
+ * no banco do IXC) — parece ser o mesmo tipo de restrição de acesso já
+ * visto em outros endpoints "bloqueados" desse fornecedor (resposta
+ * silenciosa em vez de erro explícito), mas ainda não confirmado se é
+ * específico dessa instância/usuário ou geral. Sem cabeçalho, não dá pra
+ * saber técnico/equipe/data de uma requisição só pelos itens — eles não
+ * carregam esses campos.
+ *
+ * Em testes, `/requisicao_devolucao_material` retornou "usuário não possui um
  * almoxarifado padrão" — isso é falta de configuração no cadastro do usuário
  * da API no IXC (o admin do provedor precisa definir um almoxarifado padrão
  * pra esse usuário, ou informar `id_almoxarifado` explícito no filtro), não
